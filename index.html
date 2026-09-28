@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>ESP32-CAM AI OCR</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .description {
+            color: #555;
+        }
+
+        input {
+            width: 90%;
+            max-width: 400px;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #aaa;
+            border-radius: 8px;
+            margin: 10px;
+        }
+
+        button {
+            padding: 12px 20px;
+            margin: 8px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            background: #1976d2;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #125ca5;
+        }
+
+        button:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+
+        #status {
+            margin: 15px;
+            font-weight: bold;
+        }
+
+        #cameraImage {
+            width: 640px;
+            max-width: 100%;
+            margin-top: 15px;
+            border: 2px solid #333;
+            border-radius: 10px;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 20px;
+            background: #eeeeee;
+            border-radius: 10px;
+            min-height: 80px;
+            text-align: left;
+            font-size: 22px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .label {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="container">
+
+    <h1>ESP32-CAM AI OCR</h1>
+
+    <p class="description">
+        Read letters and words from ESP32-CAM
+    </p>
+
+
+    <div>
+
+        <input
+            id="esp32IP"
+            type="text"
+            placeholder="Enter ESP32 IP address"
+        >
+
+    </div>
+
+
+    <button onclick="connectCamera()">
+        CONNECT CAMERA
+    </button>
+
+
+    <button
+        id="captureButton"
+        onclick="captureImage()"
+        disabled
+    >
+        CAPTURE
+    </button>
+
+
+    <button
+        id="readButton"
+        onclick="readText()"
+        disabled
+    >
+        READ LETTERS
+    </button>
+
+
+    <div id="status">
+        Enter ESP32 IP address
+    </div>
+
+
+    <img
+        id="cameraImage"
+        alt="ESP32-CAM image"
+    >
+
+
+    <div class="label">
+        OCR RESULT
+    </div>
+
+
+    <div id="result">
+        No text detected yet.
+    </div>
+
+</div>
+
+
+<script>
+
+// =====================================================
+// GLOBAL VARIABLES
+// =====================================================
+
+let esp32IP = "";
+
+
+// =====================================================
+// CONNECT CAMERA
+// =====================================================
+
+function connectCamera()
+{
+    let ip =
+        document.getElementById("esp32IP").value.trim();
+
+
+    if(ip === "")
+    {
+        document.getElementById("status").innerText =
+            "Please enter ESP32-CAM IP address.";
+
+        return;
+    }
+
+
+    // Remove http:// if user enters it
+
+    ip =
+        ip.replace("http://", "")
+          .replace("https://", "")
+          .replace("/", "");
+
+
+    esp32IP =
+        "http://" + ip;
+
+
+    document.getElementById("status").innerText =
+        "Connecting to ESP32-CAM...";
+
+
+    let testImage =
+        document.getElementById("cameraImage");
+
+
+    testImage.src =
+        esp32IP + "/capture?t=" + Date.now();
+
+
+    testImage.onload =
+        function()
+        {
+            document.getElementById("status").innerText =
+                "ESP32-CAM connected";
+
+            document.getElementById("captureButton")
+                .disabled = false;
+
+            document.getElementById("readButton")
+                .disabled = false;
+        };
+
+
+    testImage.onerror =
+        function()
+        {
+            document.getElementById("status").innerText =
+                "Connection failed. Check IP address.";
+        };
+}
+
+
+// =====================================================
+// CAPTURE IMAGE
+// =====================================================
+
+function captureImage()
+{
+    if(esp32IP === "")
+    {
+        document.getElementById("status").innerText =
+            "Connect ESP32-CAM first.";
+
+        return;
+    }
+
+
+    document.getElementById("status").innerText =
+        "Capturing image...";
+
+
+    let image =
+        document.getElementById("cameraImage");
+
+
+    image.src =
+        esp32IP + "/capture?t=" + Date.now();
+
+
+    image.onload =
+        function()
+        {
+            document.getElementById("status").innerText =
+                "Image captured";
+
+            document.getElementById("readButton")
+                .disabled = false;
+        };
+
+
+    image.onerror =
+        function()
+        {
+            document.getElementById("status").innerText =
+                "Camera capture failed.";
+        };
+}
+
+
+// =====================================================
+// READ TEXT
+// =====================================================
+
+function readText()
+{
+    document.getElementById("status").innerText =
+        "OCR will be added in the next step.";
+
+    document.getElementById("result").innerText =
+        "Camera connection is ready.";
+}
+
+</script>
+
+</body>
+
+</html>
